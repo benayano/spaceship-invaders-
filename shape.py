@@ -19,13 +19,14 @@ class Shape(pygame.sprite.Sprite):
         return pygame.transform.scale(self.img_shape, size)
 
     def draw(self, screen):
-        screen.blit(self.img_shape, self.position)
+        if self.life:
+            screen.blit(self.img_shape, self.position)
 
     def accident(self):
         if self.life > 0:
             self.life -= 1
         else:
-            self.kill()
+            super().kill()
             self.remove()
 
 
@@ -44,10 +45,11 @@ class SpaceShip(Shape):
             self.rect.move_ip(+self.velocity, 0)
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        if self.life:
+            screen.blit(self.image, self.rect)
 
     def shoot_sms(self):
-        return Munitions(self.rect.midtop, image_path="images/munitions.png", size=(30, 80),
+        return Munitions(self.rect.midtop, image_path="images/munitions-removebg-preview.png", size=(30, 80),
                          range_of_move=self.range_of_move,
                          velocity=(0, -1))
 
@@ -55,7 +57,8 @@ class SpaceShip(Shape):
 class Invaders(Shape):
     def __init__(self, position, image_path, size, range_of_move, life=1, velocity=(1, 40)):
         super().__init__(position, image_path, size, range_of_move, life, velocity=velocity)
-        self.velocity = (self.velocity[0], self.size[1] // 6)
+        self.velocity = velocity
+        self.image = self.load_and_adopt_image(image_path, size)
 
     def update(self, change_direction):
         if change_direction:
@@ -71,14 +74,20 @@ class Invaders(Shape):
         self.rect.move_ip(0, self.velocity[1])
 
     def shoot_sms(self):
-        return Munitions(self.rect.midtop, image_path="images/munitions.png", size=(30, 80),
+        return Munitions(self.rect.midtop, image_path="images/munitions-removebg-preview.png", size=(30, 80),
                          range_of_move=self.range_of_move,
                          velocity=(0, 1))
+
+    def load_and_adopt_image(self, image_path, size):
+        self.img_shape = pygame.image.load(image_path).convert_alpha()
+        return pygame.transform.scale(self.img_shape, size)
 
 
 class Munitions(Shape):
     def __init__(self, position, range_of_move, image_path, size, velocity=(0, 3)):
         super().__init__(position, image_path, size, range_of_move, velocity=velocity)
+        if self.velocity[1] > 0:
+            self.image = pygame.transform.rotate(self.image, 180)
 
     def update(self):
         if 0 > self.rect.midtop[1] > self.range_of_move[1]:
@@ -87,4 +96,5 @@ class Munitions(Shape):
             self.rect.move_ip(0, self.velocity[1])
 
     def draw(self, screen):
+
         screen.blit(self.image, self.rect)

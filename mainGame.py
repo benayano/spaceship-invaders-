@@ -6,6 +6,7 @@ from ScreenGame import ScreenGame
 class MainGame:
 
     def __init__(self, running=True):
+        self.running = running
         self.clock = pygame.time.Clock()
         self.space_between_shoots = 1
         SPACE = 300
@@ -13,10 +14,10 @@ class MainGame:
 
         self.screen_game = ScreenGame()
 
-        while running:
+        while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.screen_game.spaceship_shooting()
@@ -32,6 +33,7 @@ class MainGame:
                 self.screen_game.invaders_shooting()
 
             self.clock.tick(60)
-            self.screen_game.update()
+            if self.screen_game.spaceship.life > 0:
+                self.screen_game.update()
 
         pygame.quit()
