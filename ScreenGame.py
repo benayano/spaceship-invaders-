@@ -10,12 +10,13 @@ from shape import SpaceShip, Invaders
 class ScreenGame:
 
     def __init__(self):
+        self.stop_game = False
         self.settings = ScreenSettings()
-        self.creator = ShapeCreator(self.settings.game_size)
+        self.screen = pygame.display.set_mode(self.settings.game_size)
+        self.creator = ShapeCreator(self.settings.game_size, self.screen)
         self.spaceship = self.creator.create_spaceship()
         self.bg = pygame.image.load(self.settings.bg_img_path)
 
-        self.screen = pygame.display.set_mode(self.settings.game_size)
         self.screen.blit(self.bg, (0, 0))
         self.font = pygame.font.Font(None, 36)
 
@@ -29,7 +30,12 @@ class ScreenGame:
         self.create_invaders()
 
     def update(self):
+        if not self.stop_game:
+            self.game_is_running()
+        else:
+            self.game_is_stop()
 
+    def game_is_running(self):
         self.screen.blit(self.bg, (0, 0))
         self.spaceship.draw(self.screen)
         self.munitionsFriendly.update()
@@ -45,6 +51,10 @@ class ScreenGame:
         self.draw_spaceship_lives(self.spaceship.life)
         self.you_winner()
         pygame.display.update()
+
+    def game_is_stop(self):
+        self.screen.blit(self.bg, (0, 0))
+        # pygame.display.update()
 
     def update_invader_grope(self, invaders):
         for invader in invaders:
@@ -68,10 +78,10 @@ class ScreenGame:
 
     def draw_spaceship_lives(self, live_rest):
         if live_rest:
-            spaceship_size, game_size = (75, 100), self.game_size
-            self.creator.draw_lives(live_rest,self.screen)
+            self.creator.draw_lives(live_rest)
         else:
-            self.print_on_screen('game over')
+            self.stop_game = True
+            self.creator.draw_text_on_screen('game over')
 
     def check_accidents(self):
         pygame.sprite.groupcollide(self.invaders, self.munitionsFriendly, True, True)
@@ -81,17 +91,9 @@ class ScreenGame:
         pygame.sprite.groupcollide(self.munitionsFriendly, self.munitionsEnemy, True, True)
 
         if pygame.sprite.spritecollide(self.spaceship, self.munitionsEnemy, True):
-            print(f"the ship is collide{self.spaceship.life}")
             self.spaceship.accident()
-
-    def print_on_screen(self, text, green=(0, 255, 0), blue=(0, 0, 128), size=100):
-        font = pygame.font.Font('freesansbold.ttf', size)
-        game_over_text = font.render(text, True, green, blue)
-        textRect = game_over_text.get_rect()
-        textRect.move_ip((self.game_size[0] - size * 0.5 * len(text)) // 3, self.game_size[1] // 3)
-
-        self.screen.blit(game_over_text, textRect)
 
     def you_winner(self):
         if not self.invaders and not self.speed_invaders:
-            self.print_on_screen('you are winner !!!!')
+            self.stop_game = True
+            self.creator.draw_text_on_screen('you are winner !!!!')

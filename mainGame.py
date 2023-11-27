@@ -9,7 +9,7 @@ class MainGame:
         self.running = running
         self.clock = pygame.time.Clock()
         self.space_between_shoots = 1
-        SPACE = 300
+        SPACE_SHOOTING = 150
         pygame.init()
 
         self.screen_game = ScreenGame()
@@ -28,12 +28,11 @@ class MainGame:
             if keys[pygame.K_RIGHT]:
                 self.screen_game.spaceship.move_right()
 
-            self.space_between_shoots = (self.space_between_shoots + 1) % SPACE
+            self.space_between_shoots = (self.space_between_shoots + 1) % SPACE_SHOOTING
             if self.space_between_shoots == 1:
                 self.screen_game.invaders_shooting()
 
             self.clock.tick(60)
-            if self.screen_game.spaceship.life > 0:
-                self.screen_game.update()
+            self.screen_game.update()
 
         pygame.quit()
